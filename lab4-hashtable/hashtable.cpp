@@ -23,7 +23,7 @@ vector<vector<Player>> create_hashtable(string file, int sizeHash, ofstream &out
     output << "TEMPO DE CONSTRUCAO DA TABELA: " << duration << "ms" << endl;
     output << "TAXA DE OCUPACAO: " << (float) occupied/sizeHash << endl;
     output << "TAMANHO MAXIMO DE LISTA: " << max_list << endl;
-    output << "TAMANHO MEDIO DE LISTA: " << entries/occupied << endl;
+    output << "TAMANHO MEDIO DE LISTA: " << (float) entries/occupied << endl;
     
     input.close();
     return hashtable;
@@ -102,7 +102,7 @@ void searchHashArq(vector<vector<Player>> &hashtable, ofstream &output) {
     }
 
     output << "MAXIMO DE NUMERO DE TESTES POR NOME ENCONTRADO: " << maxTest << endl;
-    output << "MEDIA NUMERO DE TESTES POR NOME ENCONTRADO: " << n_test/found << endl;
+    output << "MEDIA NUMERO DE TESTES POR NOME ENCONTRADO: " << (float) n_test/found << endl;
 
     input.close();
     output.close();
