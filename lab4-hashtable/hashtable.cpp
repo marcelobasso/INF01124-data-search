@@ -19,7 +19,7 @@ vector<vector<Player>> create_hashtable(string file, int sizeHash, ofstream &out
     
     auto end = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    output << "PARTE1: ESTATISTICAS DA TABELA HASH" << endl;
+    output << "PARTE 1: ESTATISTICAS DA TABELA HASH" << endl;
     output << "TEMPO DE CONSTRUCAO DA TABELA " << duration << "ms" << endl;
     output << "TAXA DE OCUPACAO " << (float) occupied/sizeHash << endl;
     cout << occupied << " " << sizeHash << endl;
