@@ -7,7 +7,8 @@
 #include <string.h>
 #include <vector>
 #include <fstream>
-#include <fstream>
+#include <sstream>
+#include <chrono>
 
 using namespace std;
 
@@ -16,4 +17,7 @@ typedef struct player {
     string name, positions;
 } Player;
 
-void create_hashtable(string file);
+vector<vector<Player>> create_hashtable(string file, int sizeHash, ofstream &output);
+int insertHash(string stats_player, vector<vector<Player>> &hashtable, int sizeHash, int *occupied);
+Player searchHash(int fifa_id, vector<vector<Player>> &hashtable, int &tests, int &found);
+void searchHashArq(vector<vector<Player>> &hashtable, ofstream &output);
