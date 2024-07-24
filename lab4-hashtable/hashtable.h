@@ -13,7 +13,7 @@
 using namespace std;
 
 typedef struct player {
-    int sofifa_id;
+    int sofifa_id, tests;
     string name, positions;
 } Player;
 

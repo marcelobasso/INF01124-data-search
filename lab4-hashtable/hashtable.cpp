@@ -71,6 +71,7 @@ Player searchHash(int fifa_id, vector<vector<Player>> &hashtable, int &tests, in
             auxPlayer.name=hashtable[key][i].name;
             auxPlayer.positions=hashtable[key][i].positions;
         }
+        auxPlayer.tests = i + 1;
     }
 
     return auxPlayer;
@@ -98,7 +99,7 @@ void searchHashArq(vector<vector<Player>> &hashtable, ofstream &output) {
     output << "TEMPO DE REALIZACAO DE TODAS AS CONSULTAS: " << duration << "ms"<< endl;
 
     for (int i=0; i<consultas.size(); i++) {
-        output << consultas[i].sofifa_id << " " << consultas[i].name << endl;
+        output << consultas[i].sofifa_id << " " << consultas[i].name << " " << consultas[i].tests << endl;
     }
 
     output << "MAXIMO DE NUMERO DE TESTES POR NOME ENCONTRADO: " << maxTest << endl;
