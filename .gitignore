@@ -7,6 +7,9 @@
 # Unignore all dirs
 !*/
 
+# big big file
+final-project/inputs/rating.csv
+
 output*.txt
 __pycache__
 time_data*.txt
