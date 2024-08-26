@@ -47,12 +47,11 @@ Trie* insertTriePlayers(Trie* root, string& name, int value, int d) {
 
     char c = tolower(name[d]);
 
-    if (root == nullptr)
-        root = createNode(c, value);
-
-    // if value is not on the array
-    if (root->c == c && find(root->value.begin(), root->value.end(), value) == root->value.end()) 
-        root->value.push_back(value);
+    if (root == nullptr) {
+        root = createNode(c, value); 
+    }
+    if(root->c==c && find(root->value.begin(), root->value.end(), value) == root->value.end() && root->mid != nullptr) 
+        root->mid->value.push_back(value);
 
     if (c < root->c) {
         root->left = insertTriePlayers(root->left, name, value, d);
@@ -264,6 +263,24 @@ void quicksortPlayers(vector<pair<Player, float>>& c, int lo, int hi) {
     }
 }
 
+void printHeader() {
+    cout << "\n" << left << setw(14) << setfill(SEPARATOR) << "Sofifa_id";
+    cout << left << setw(20) << setfill(SEPARATOR) << "Short name";
+    cout << left << setw(40) << setfill(SEPARATOR) << "Full name";
+    cout << left << setw(14) << setfill(SEPARATOR) << "Positions";
+    cout << left << setw(14) << setfill(SEPARATOR) << "G. rating";
+    cout << left << setw(14) << setfill(SEPARATOR) << "Count";
+}
+
+void printPlayer(Player& player) {
+    cout << left << setw(14) << setfill(SEPARATOR) << player.sofifa_id;
+    cout << left << setw(20) << setfill(SEPARATOR) << player.shortname;
+    cout << left << setw(40) << setfill(SEPARATOR) << player.name;
+    cout << left << setw(14) << setfill(SEPARATOR) << player.positions;
+    cout << left << setw(14) << setfill(SEPARATOR) << player.rating / player.count;
+    cout << left << setw(14) << setfill(SEPARATOR) << player.count;
+}
+
 bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vector<User>>& hashtableU, Trie* names, Trie* tags, int sizeHash) {
     string search = "", input;
     vector<int> playerNames;
@@ -278,10 +295,13 @@ bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vec
         // player prefix search
         playerNames = searchTrie(names, queryS[1], 0);
 
+        printHeader();
+        cout << endl;
         for (int i = 0; i < playerNames.size(); i++) {
+            // id, shortname, name, position, rating, count
             auxPlayer = searchHash(playerNames[i], hashtableP);
-            cout << left << setw(NUM_WIDTH) << setfill(SEPARATOR) << auxPlayer.name;
-            cout << left << setw(NUM_WIDTH) << setfill(SEPARATOR) << auxPlayer.rating / auxPlayer.count << endl;
+            printPlayer(auxPlayer);
+            cout << endl;
         }
     } else if (queryS[0] == "user") {
         // userId search
@@ -302,20 +322,14 @@ bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vec
                 players_list.push_back(make_pair(hashtableP[player_key][player_index], rating.second));
             }
 
-            cout << players_list[players_list.size() - 1].first.name << " " << players_list[players_list.size() - 1].first.shortname;
-
             // order players
-            // ?????
-            quicksortPlayers(players_list, 0, players_list.size() - 2);
-
+            quicksortPlayers(players_list, 0, players_list.size() - 2); // - 2?
             // prints 20 top players
+            printHeader();
+            cout << left << setw(14) << setfill(SEPARATOR) << "Rating" << endl;
             for (int i = 0; i < 20; i++) {
-                cout << left << players_list[i].first.sofifa_id << "\t";
-                cout << left << players_list[i].first.shortname << "\t\t";
-                cout << left << players_list[i].first.name << "\t\t\t\t\t\t";
-                cout << left << players_list[i].first.rating / players_list[i].first.count << "\t";
-                cout << left << players_list[i].first.count << "\t";
-                cout << left << players_list[i].second << "\n";
+                printPlayer(players_list[i].first);
+                cout << left << setw(14) << setfill(SEPARATOR) << players_list[i].second << endl;
             }
         }
     } else if (queryS[0] == "top") {

@@ -2,6 +2,7 @@
 
 #define PLAYERS "inputs/players.csv"
 #define RATING "inputs/rating.csv"
+// #define RATING "inputs/minirating.csv"
 #define TAGS "inputs/tags.csv"
 
 int main(){
