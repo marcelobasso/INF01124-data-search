@@ -23,8 +23,7 @@ Trie* createNode(char c, int value ) {
     return new Trie { c, items, nullptr, nullptr, nullptr };
 }
 
-Trie* createTrie(string file, int option) 
-{
+Trie* createTrie(string file, int option)  {
     ifstream f(file);
     aria::csv::CsvParser parser(f);
     Trie* root = nullptr;
@@ -33,7 +32,6 @@ Trie* createTrie(string file, int option)
     
     // ignores first line (header)
     parser.begin();
-
     for (auto& row : parser) {
         name = row[2];
         sofifa_id = stoi(row[option]);
@@ -44,16 +42,16 @@ Trie* createTrie(string file, int option)
     return root;
 }
 
-Trie* insertTriePlayers(Trie* root, string& name, int value, int d) 
-{
+Trie* insertTriePlayers(Trie* root, string& name, int value, int d) {
     if (d == name.length()) return root;
 
     char c = tolower(name[d]);
 
-    if (root == nullptr) {
-        root = createNode(c, value); 
-    }
-    if(root->c==c && find(root->value.begin(), root->value.end(), value) == root->value.end()) 
+    if (root == nullptr)
+        root = createNode(c, value);
+
+    // if value is not on the array
+    if (root->c == c && find(root->value.begin(), root->value.end(), value) == root->value.end()) 
         root->value.push_back(value);
 
     if (c < root->c) {
@@ -80,9 +78,10 @@ Trie* intertTrieTags(Trie* root, string& name, int value, int d)
     } else if (c > root->c) {
         root->right = intertTrieTags(root->right, name, value, d);
     } else {
-        if (d + 2 == name.length()) {
-            if (root->mid == nullptr) root->mid = createNode(0, value);
-            else if(find(root->mid->value.begin(), root->mid->value.end(), value) == root->mid->value.end())
+        if (d == name.length() -1) {
+            if (root->mid == nullptr) 
+                root->mid = createNode(0, value);
+            else if (find(root->mid->value.begin(), root->mid->value.end(), value) == root->mid->value.end())
                 root->mid->value.push_back(value);
         }
         else root->mid = intertTrieTags(root->mid, name, value, d + 1);
@@ -103,7 +102,7 @@ vector<int> searchTrie(Trie* root, const string& name, int d)
     else if (c > root->c) 
         return searchTrie(root->right, name, d);
     else {
-        if (d + 2 == name.length()) {
+        if (d == name.length() - 1) {
             if (root->mid != nullptr) 
                 return root->mid->value;
 
@@ -234,6 +233,37 @@ std::vector<std::string> split(std::string s, std::string delimiter) {
     return res;
 }
 
+void swap_quick(vector<pair<Player, float>>& players_list, int i, int j) {
+    pair<Player, float> temp = players_list[i];
+    players_list[i] = players_list[j];
+    players_list[j] = temp;
+}
+
+void quicksortPlayers(vector<pair<Player, float>>& c, int lo, int hi) {
+    pair<Player, float> v = c[lo];
+    int lt = lo, i = lo + 1, gt = hi;
+
+    if (lo < hi) {
+        while (i <= gt) {
+            if (c[i].second > v.second)
+                swap_quick(c, lt++, i++);
+            else if (c[i].second < v.second)
+                swap_quick(c, i, gt--);
+            else {
+                // same frequency, orders by global rating (c[i].first.rating / c[i].firt.count)
+                if ((v.first.rating / v.first.count) > (c[i].first.rating / c[i].first.count)) {
+                    swap_quick(c, i, gt--);
+                } else {
+                    swap_quick(c, lt++, i++);
+                }
+            }
+        }
+
+        quicksortPlayers(c, lo, lt - 1);
+        quicksortPlayers(c, gt + 1, hi);
+    }
+}
+
 bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vector<User>>& hashtableU, Trie* names, Trie* tags, int sizeHash) {
     string search = "", input;
     vector<int> playerNames;
@@ -255,6 +285,7 @@ bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vec
         }
     } else if (queryS[0] == "user") {
         // userId search
+        players_list.clear();
         user_id = stoi(queryS[1]);
         user_key = user_id % sizeHash;
         user_index = returnIndexUser(hashtableU, sizeHash, user_id);
@@ -266,21 +297,26 @@ bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vec
             // find players
             for (pair<int, float>& rating : hashtableU[user_key][user_index].players_rating) {
                 player_id = rating.first;
+                player_key = player_id % sizeHash;
                 player_index = returnIndexPlayer(hashtableP, sizeHash, player_id);
-                // players_list.push_back(make_pair(hashtableP[player_key][player_index], rating.second));
+                players_list.push_back(make_pair(hashtableP[player_key][player_index], rating.second));
             }
 
-            // order players
+            cout << players_list[players_list.size() - 1].first.name << " " << players_list[players_list.size() - 1].first.shortname;
 
-            // prints players
-            // for (auto& el : players_list) {
-            //     cout << left << setw(NUM_WIDTH) << setfill(SEPARATOR) << el.first.sofifa_id;
-            //     cout << left << setw(NUM_WIDTH) << setfill(SEPARATOR) << el.first.shortname;
-            //     cout << left << setw(NUM_WIDTH) << setfill(SEPARATOR) << el.first.name;
-            //     cout << left << setw(NUM_WIDTH) << setfill(SEPARATOR) << el.first.rating / el.first.count;
-            //     cout << left << setw(NUM_WIDTH) << setfill(SEPARATOR) << el.first.count;
-            //     cout << left << setw(NUM_WIDTH) << setfill(SEPARATOR) << el.second;
-            // }
+            // order players
+            // ?????
+            quicksortPlayers(players_list, 0, players_list.size() - 2);
+
+            // prints 20 top players
+            for (int i = 0; i < 20; i++) {
+                cout << left << players_list[i].first.sofifa_id << "\t";
+                cout << left << players_list[i].first.shortname << "\t\t";
+                cout << left << players_list[i].first.name << "\t\t\t\t\t\t";
+                cout << left << players_list[i].first.rating / players_list[i].first.count << "\t";
+                cout << left << players_list[i].first.count << "\t";
+                cout << left << players_list[i].second << "\n";
+            }
         }
     } else if (queryS[0] == "top") {
 
