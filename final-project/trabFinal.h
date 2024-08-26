@@ -10,7 +10,12 @@
 #include <chrono>
 #include <algorithm>
 #include <cctype>
+#include <iomanip>
 #include "parser.hpp"
+
+#define SEPARATOR ' '
+#define NAME_WIDTH 6
+#define NUM_WIDTH 8
 
 using namespace std;
 
@@ -73,3 +78,7 @@ void calcRating(vector<vector<Player>>& hashtable, int sizeHash, int player_id, 
 // @brief Searches on the hashtable.
 Player searchHash(int fifa_id, vector<vector<Player>> &hashtable);
  
+// @brief Prints menu of queries
+void printHelp();
+
+bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vector<User>>& hashtableU, Trie* names, Trie* tags, int sizeHash);

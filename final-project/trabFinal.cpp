@@ -208,3 +208,88 @@ void calcRating(vector<vector<Player>>& hashtable, int sizeHash, int player_id, 
     hashtable[key][index].count++;
     hashtable[key][index].rating += rating;
 }
+
+void printHelp() {
+    std::cout << "\nUsage\n  [option] <arguments>\n\n";
+    std::cout << "Options:\n  player <prefix>\n    Search player by prefix\n\n";
+    std::cout << "  user <user_id>\n    Search user by ID\n\n";
+    std::cout << "  top <N> <position>\n    N top players\n\n";
+    std::cout << "  tags <list of tags>\n    Search players that have this tags\n\n";
+    std::cout << "  q - Quit program" << endl;
+}
+
+// for string delimiter
+std::vector<std::string> split(std::string s, std::string delimiter) {
+    size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+    std::string token;
+    std::vector<std::string> res;
+
+    while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos) {
+        token = s.substr (pos_start, pos_end - pos_start);
+        pos_start = pos_end + delim_len;
+        res.push_back (token);
+    }
+
+    res.push_back (s.substr (pos_start));
+    return res;
+}
+
+bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vector<User>>& hashtableU, Trie* names, Trie* tags, int sizeHash) {
+    string search = "", input;
+    vector<int> playerNames;
+    Player auxPlayer;
+    vector<pair<Player, float>> players_list;
+    int user_id, user_key, user_index, player_id, player_key, player_index;
+    vector<string> queryS;
+
+    queryS = split(query, " ");
+
+    if (queryS[0] == "player") {
+        // player prefix search
+        playerNames = searchTrie(names, queryS[1], 0);
+
+        for (int i = 0; i < playerNames.size(); i++) {
+            auxPlayer = searchHash(playerNames[i], hashtableP);
+            cout << left << setw(NUM_WIDTH) << setfill(SEPARATOR) << auxPlayer.name;
+            cout << left << setw(NUM_WIDTH) << setfill(SEPARATOR) << auxPlayer.rating / auxPlayer.count << endl;
+        }
+    } else if (queryS[0] == "user") {
+        // userId search
+        user_id = stoi(queryS[1]);
+        user_key = user_id % sizeHash;
+        user_index = returnIndexUser(hashtableU, sizeHash, user_id);
+
+        if (user_index == -1) {
+            cout << "User does not exist!\n\n";
+            return 1;
+        } else {
+            // find players
+            for (pair<int, float>& rating : hashtableU[user_key][user_index].players_rating) {
+                player_id = rating.first;
+                player_index = returnIndexPlayer(hashtableP, sizeHash, player_id);
+                // players_list.push_back(make_pair(hashtableP[player_key][player_index], rating.second));
+            }
+
+            // order players
+
+            // prints players
+            // for (auto& el : players_list) {
+            //     cout << left << setw(NUM_WIDTH) << setfill(SEPARATOR) << el.first.sofifa_id;
+            //     cout << left << setw(NUM_WIDTH) << setfill(SEPARATOR) << el.first.shortname;
+            //     cout << left << setw(NUM_WIDTH) << setfill(SEPARATOR) << el.first.name;
+            //     cout << left << setw(NUM_WIDTH) << setfill(SEPARATOR) << el.first.rating / el.first.count;
+            //     cout << left << setw(NUM_WIDTH) << setfill(SEPARATOR) << el.first.count;
+            //     cout << left << setw(NUM_WIDTH) << setfill(SEPARATOR) << el.second;
+            // }
+        }
+    } else if (queryS[0] == "top") {
+
+    } else if (queryS[0] == "tags") {
+        
+    } else if (queryS[0] != "q") {
+        cout << "Invalid query!\n" << endl;
+    }
+
+    return 1;
+}
+
