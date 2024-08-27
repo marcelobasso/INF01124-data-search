@@ -35,7 +35,7 @@ Trie* createTrie(string file, int option)  {
     for (auto& row : parser) {
         name = row[2];
         sofifa_id = stoi(row[option]);
-        root = !option ? insertTriePlayers(root, name, sofifa_id, 0) : intertTrieTags(root, name, sofifa_id, 0);
+        root = !option ? insertTriePlayers(root, name, sofifa_id, 0) : insertTrieTags(root, name, sofifa_id, 0);
     }
 
     f.close();
@@ -64,26 +64,27 @@ Trie* insertTriePlayers(Trie* root, string& name, int value, int d) {
     return root;
 }
 
-Trie* intertTrieTags(Trie* root, string& name, int value, int d)
+Trie* insertTrieTags(Trie* root, string& name, int value, int d)
 {
     if (d == name.length()) return root;
+
     char c = tolower(name[d]);
-    if (root == nullptr) {
+    if (root == nullptr)
         root = createNode(c, 0);
-    }
 
     if (c < root->c) {
-        root->left = intertTrieTags(root->left, name, value, d);
+        root->left = insertTrieTags(root->left, name, value, d);
     } else if (c > root->c) {
-        root->right = intertTrieTags(root->right, name, value, d);
+        root->right = insertTrieTags(root->right, name, value, d);
     } else {
-        if (d == name.length() -1) {
+        if (d == name.length() - 1) {
             if (root->mid == nullptr) 
                 root->mid = createNode(0, value);
             else if (find(root->mid->value.begin(), root->mid->value.end(), value) == root->mid->value.end())
                 root->mid->value.push_back(value);
         }
-        else root->mid = intertTrieTags(root->mid, name, value, d + 1);
+        else 
+            root->mid = insertTrieTags(root->mid, name, value, d + 1);
     }
 
     return root;
@@ -263,27 +264,58 @@ void quicksortPlayers(vector<pair<Player, float>>& c, int lo, int hi) {
     }
 }
 
-void printHeader() {
+void selectionSort(vector<pair<Player, float>>& pl) {
+    for (int i = 0; i < pl.size(); i++) {
+        int max_idx = i;
+
+        for (int j = i + 1; j < pl.size(); j++) {
+            if (pl[j].second > pl[max_idx].second)
+                max_idx = j;
+        }
+
+        if (max_idx != i) swap_quick(pl, i, max_idx);
+    }
+}
+
+
+void printHeader(bool full_info) {
     cout << "\n" << left << setw(14) << setfill(SEPARATOR) << "Sofifa_id";
     cout << left << setw(20) << setfill(SEPARATOR) << "Short name";
-    cout << left << setw(40) << setfill(SEPARATOR) << "Full name";
+    cout << left << setw(40) << setfill(SEPARATOR) << "Long name";
     cout << left << setw(14) << setfill(SEPARATOR) << "Positions";
+    if (full_info) cout << left << setw(14) << setfill(SEPARATOR) << "Nacionality";
+    if (full_info) cout << left << setw(25) << setfill(SEPARATOR) << "Club name";
+    if (full_info) cout << left << setw(27) << setfill(SEPARATOR) << "League name";
     cout << left << setw(14) << setfill(SEPARATOR) << "G. rating";
     cout << left << setw(14) << setfill(SEPARATOR) << "Count";
 }
 
-void printPlayer(Player& player) {
+void printPlayer(Player& player, bool full_info) {
     cout << left << setw(14) << setfill(SEPARATOR) << player.sofifa_id;
     cout << left << setw(20) << setfill(SEPARATOR) << player.shortname;
     cout << left << setw(40) << setfill(SEPARATOR) << player.name;
     cout << left << setw(14) << setfill(SEPARATOR) << player.positions;
-    cout << left << setw(14) << setfill(SEPARATOR) << player.rating / player.count;
+    if (full_info) cout << left << setw(14) << setfill(SEPARATOR) << player.nation;
+    if (full_info) cout << left << setw(25) << setfill(SEPARATOR) << player.club;
+    if (full_info) cout << left << setw(27) << setfill(SEPARATOR) << player.liga;
+    cout << left << setw(14) << setfill(SEPARATOR) << fixed << setprecision(6) << (float) player.rating / player.count;
     cout << left << setw(14) << setfill(SEPARATOR) << player.count;
+}
+
+std::vector<int> intersection(std::vector<int>& v1,std::vector<int>& v2) {
+    std::vector<int> v3;
+    std::sort(v1.begin(), v1.end());
+    std::sort(v2.begin(), v2.end());
+
+    std::set_intersection(v1.begin(),v1.end(),
+                          v2.begin(),v2.end(),
+                          back_inserter(v3));
+    return v3;
 }
 
 bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vector<User>>& hashtableU, Trie* names, Trie* tags, int sizeHash) {
     string search = "", input;
-    vector<int> playerNames;
+    vector<int> playersId, auxPlayersId;
     Player auxPlayer;
     vector<pair<Player, float>> players_list;
     int user_id, user_key, user_index, player_id, player_key, player_index;
@@ -293,14 +325,14 @@ bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vec
 
     if (queryS[0] == "player") {
         // player prefix search
-        playerNames = searchTrie(names, queryS[1], 0);
+        playersId = searchTrie(names, queryS[1], 0);
 
-        printHeader();
+        printHeader(false);
         cout << endl;
-        for (int i = 0; i < playerNames.size(); i++) {
+        for (int i = 0; i < playersId.size(); i++) {
             // id, shortname, name, position, rating, count
-            auxPlayer = searchHash(playerNames[i], hashtableP);
-            printPlayer(auxPlayer);
+            auxPlayer = searchHash(playersId[i], hashtableP);
+            printPlayer(auxPlayer, false);
             cout << endl;
         }
     } else if (queryS[0] == "user") {
@@ -325,17 +357,47 @@ bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vec
             // order players
             quicksortPlayers(players_list, 0, players_list.size() - 2); // - 2?
             // prints 20 top players
-            printHeader();
+            printHeader(false);
             cout << left << setw(14) << setfill(SEPARATOR) << "Rating" << endl;
             for (int i = 0; i < 20; i++) {
-                printPlayer(players_list[i].first);
-                cout << left << setw(14) << setfill(SEPARATOR) << players_list[i].second << endl;
+                printPlayer(players_list[i].first, false);
+                cout << left << setw(14) << setfill(SEPARATOR) << fixed << setprecision(6) << players_list[i].second << endl;
             }
         }
     } else if (queryS[0] == "top") {
 
     } else if (queryS[0] == "tags") {
-        
+        queryS = split(query, "'");
+        // runs first search
+        playersId = searchTrie(tags, queryS[1], 0);
+
+        // vector intersection for each next tag on the input (surounded by '')
+        for (int i = 3; i < queryS.size(); i += 2) {
+            auxPlayersId = searchTrie(tags, queryS[i], 0);
+            playersId = intersection(playersId, auxPlayersId);
+        }
+
+        // gets player info
+        players_list.clear();
+        for (int id : playersId) {
+            player_id = id;
+            player_key = player_id % sizeHash;
+            player_index = returnIndexPlayer(hashtableP, sizeHash, player_id);
+            auxPlayer = hashtableP[player_key][player_index];
+            players_list.push_back(make_pair(auxPlayer, auxPlayer.rating / auxPlayer.count));
+        }
+
+        // order players by global rating
+        selectionSort(players_list);
+
+        // prints players
+        printHeader(true);
+        cout << endl;
+        for (pair<Player, float>& p : players_list) {
+            printPlayer(p.first, true);
+            cout << endl;
+        }
+
     } else if (queryS[0] != "q") {
         cout << "Invalid query!\n" << endl;
     }

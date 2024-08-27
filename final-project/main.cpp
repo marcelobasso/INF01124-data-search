@@ -52,10 +52,10 @@ int main(){
     //     cout << auxPlayer.name << "\t" << auxPlayer.rating / auxPlayer.count << endl;
     // }
     
-    // name = "Solid Player";
+    // string name = "Solid Player";
     // vector<int> players = searchTrie(tags, name, 0);
     // for (int i = 0; i < players.size(); i++) {
-    //     auxPlayer = searchHash(players[i], hashtableP);
+    //     Player auxPlayer = searchHash(players[i], hashtableP);
     //     cout << auxPlayer.name << "\t" << auxPlayer.rating / auxPlayer.count << endl;
     // }
     

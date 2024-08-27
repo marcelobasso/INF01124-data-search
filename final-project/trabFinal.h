@@ -47,7 +47,7 @@ Trie* createTrie(string file, int option);
 Trie* insertTriePlayers(Trie* root, string& name, int value, int d);
 
 // @brief Adds item to the tags Trie Tree.
-Trie* intertTrieTags(Trie* root, string& name, int value, int d);
+Trie* insertTrieTags(Trie* root, string& name, int value, int d);
 
 // @brief Creates Trie node.
 Trie* createNode(char c, int value);
@@ -62,7 +62,7 @@ vector<vector<Player>> createHashtablePlayers(string file, int sizeHash);
 vector<vector<User>> createsHashtableUsers(string file, int sizeHash, vector<vector<Player>> &hashtable);
 
 // @brief function to inser a new element on the players hashtable.
-void insertHashPlayer (vector<string> stats_player, vector<vector<Player>>& hashtable, int sizeHash);
+void insertHashPlayer(vector<string> stats_player, vector<vector<Player>>& hashtable, int sizeHash);
 
 // @brief function to inser a new element on the users hashtable.
 void insertHashUser(vector<string> review, vector<vector<Player>>& hashtablePlayer, vector<vector<User>>& hashtable, int sizeHash, int sizeHashP);
