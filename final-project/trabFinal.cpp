@@ -50,7 +50,8 @@ Trie* insertTriePlayers(Trie* root, string& name, int value, int d) {
     if (root == nullptr) {
         root = createNode(c, value); 
     }
-    if(root->c==c && find(root->value.begin(), root->value.end(), value) == root->value.end() && root->mid != nullptr) 
+
+    if (root->c == c && root->mid != nullptr && find(root->mid->value.begin(), root->mid->value.end(), value) == root->mid->value.end()) 
         root->mid->value.push_back(value);
 
     if (c < root->c) {
@@ -351,13 +352,23 @@ bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vec
     if (queryS[0] == "player") {
         // player prefix search
         playersId = searchTrie(names, queryS[1], 0);
+        players_list.clear();
 
-        printHeader(false);
-        cout << endl;
+        // searches
         for (int i = 0; i < playersId.size(); i++) {
             // id, shortname, name, position, rating, count
             auxPlayer = searchHash(playersId[i], hashtableP);
-            printPlayer(auxPlayer, false);
+            players_list.push_back(make_pair(auxPlayer, auxPlayer.rating / auxPlayer.count));
+        }
+
+        // orders players
+        quick_sort(players_list, 0, players_list.size() - 1);
+
+        // prints players
+        printHeader(false);
+        cout << endl;
+        for (pair<Player, float>& p : players_list) {
+            printPlayer(p.first, false);
             cout << endl;
         }
     } else if (queryS[0] == "user") {

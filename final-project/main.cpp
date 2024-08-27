@@ -50,7 +50,7 @@ int main(){
     // string name = "OPA";
     // vector<int> playerNames = searchTrie(names, name, 0);
     // for (int i = 0; i < playerNames.size(); i++) {
-    //     auxPlayer = searchHash(playerNames[i], hashtableP);
+    //     Player auxPlayer = searchHash(playerNames[i], hashtableP);
     //     cout << auxPlayer.name << "\t" << auxPlayer.rating / auxPlayer.count << endl;
     // }
     
