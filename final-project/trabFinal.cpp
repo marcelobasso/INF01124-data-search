@@ -239,41 +239,40 @@ void swap_quick(vector<pair<Player, float>>& players_list, int i, int j) {
     players_list[j] = temp;
 }
 
-void quicksortPlayers(vector<pair<Player, float>>& c, int lo, int hi) {
-    pair<Player, float> v = c[lo];
-    int lt = lo, i = lo + 1, gt = hi;
-
-    if (lo < hi) {
-        while (i <= gt) {
-            if (c[i].second > v.second)
-                swap_quick(c, lt++, i++);
-            else if (c[i].second < v.second)
-                swap_quick(c, i, gt--);
-            else {
-                // same frequency, orders by global rating (c[i].first.rating / c[i].firt.count)
-                if ((v.first.rating / v.first.count) > (c[i].first.rating / c[i].first.count)) {
-                    swap_quick(c, i, gt--);
-                } else {
-                    swap_quick(c, lt++, i++);
-                }
-            }
+bool compare_player(pair<Player, float>& pla, pair<Player, float>& plb) {
+    if (pla.second != -1) {
+        if (pla.second == plb.second) {
+            return pla.first.rating / pla.first.count >= plb.first.rating / plb.first.count;
         }
 
-        quicksortPlayers(c, lo, lt - 1);
-        quicksortPlayers(c, gt + 1, hi);
+        return pla.second > plb.second;
     }
+
+    return pla.first.rating / pla.first.count >= plb.first.rating / plb.first.count;
 }
 
-void selectionSort(vector<pair<Player, float>>& pl) {
-    for (int i = 0; i < pl.size(); i++) {
-        int max_idx = i;
+int quick_partition(vector<pair<Player, float>>& players, int low, int high) {
+    pair<Player, float>& pivot = players[high]; 
+    int i = low - 1;
 
-        for (int j = i + 1; j < pl.size(); j++) {
-            if (pl[j].second > pl[max_idx].second)
-                max_idx = j;
+    for (int j = low; j <= high - 1; j++) {
+        if (compare_player(players[j], pivot)) {
+            i++; 
+            swap_quick(players, i, j);
         }
+    }
+    swap_quick(players, i+1, high);
 
-        if (max_idx != i) swap_quick(pl, i, max_idx);
+    return (i + 1);
+}
+
+// Função principal do QuickSort
+void quick_sort(vector<pair<Player, float>>& players, int low, int high) {
+    if (low < high) {
+        int p = quick_partition(players, low, high);
+
+        quick_sort(players, low, p - 1);
+        quick_sort(players, p + 1, high);
     }
 }
 
@@ -355,7 +354,7 @@ bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vec
             }
 
             // order players
-            quicksortPlayers(players_list, 0, players_list.size() - 2); // - 2?
+            quick_sort(players_list, 0, players_list.size() - 1);
             // prints 20 top players
             printHeader(false);
             cout << left << setw(14) << setfill(SEPARATOR) << "Rating" << endl;
@@ -388,7 +387,7 @@ bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vec
         }
 
         // order players by global rating
-        selectionSort(players_list);
+        quick_sort(players_list, 0, players_list.size() - 1);
 
         // prints players
         printHeader(true);
