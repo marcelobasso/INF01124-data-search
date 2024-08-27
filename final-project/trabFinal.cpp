@@ -113,7 +113,7 @@ vector<int> searchTrie(Trie* root, const string& name, int d)
     }
 }
 
-vector<vector<Player>> createHashtablePlayers(string file, int sizeHash) 
+vector<vector<Player>> createHashtablePlayers(string file, int sizeHash, vector<vector<int>>& hashtablePos, int sizePosHash) 
 {
     vector<vector<Player>> hashtable(sizeHash);
     ifstream f(file);
@@ -121,8 +121,10 @@ vector<vector<Player>> createHashtablePlayers(string file, int sizeHash)
 
     // ignores first line (header)    
     parser.begin();
-    for (auto& row : parser)
+    for (auto& row : parser) {
         insertHashPlayer(row, hashtable, sizeHash);
+        insertHashPositions(row, hashtablePos, sizePosHash);
+    }
 
     f.close();
     return hashtable;
@@ -156,6 +158,30 @@ void insertHashPlayer(vector<string> stats_player, vector<vector<Player>> &hasht
     auxPlayer.club = stats_player[5];
     auxPlayer.liga = stats_player[6];
     hashtable[auxPlayer.sofifa_id % sizeHash].push_back(auxPlayer); 
+}
+
+int calcString(string s) {
+    int sum = 1, i = 1;
+    for (char c : s) {
+        sum *= c * i;
+        i += 2;
+    }
+
+    return sum;
+}
+
+void insertHashPositions(vector<string> stats_player, vector<vector<int>> &hashtable, int sizeHash) {
+    int player_id = stoi(stats_player[0]);
+    string positions = stats_player[3];
+    vector<string> pos;
+
+    // separates positions
+    for (string pos : split(positions, ", ")) {
+        // removes ""
+        if (pos[0] == '"') pos.erase(0);
+        if (pos[pos.size() - 1] == '"') pos.erase(pos.size() - 1);
+        hashtable[calcString(pos) % sizeHash].push_back(player_id);
+    }
 }
 
 void insertHashUser(vector<string> review, vector<vector<Player>>& hashtablePlayer,vector<vector<User>> &hashtable, int sizeHash, int sizeHashP)
@@ -229,7 +255,7 @@ std::vector<std::string> split(std::string s, std::string delimiter) {
         res.push_back (token);
     }
 
-    res.push_back (s.substr (pos_start));
+    res.push_back(s.substr(pos_start));
     return res;
 }
 
@@ -312,12 +338,12 @@ std::vector<int> intersection(std::vector<int>& v1,std::vector<int>& v2) {
     return v3;
 }
 
-bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vector<User>>& hashtableU, Trie* names, Trie* tags, int sizeHash) {
+bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vector<User>>& hashtableU, vector<vector<int>>& hashtablePos, Trie* names, Trie* tags, int sizeHash, int sizeHashPos) {
     string search = "", input;
     vector<int> playersId, auxPlayersId;
     Player auxPlayer;
     vector<pair<Player, float>> players_list;
-    int user_id, user_key, user_index, player_id, player_key, player_index;
+    int user_id, user_key, user_index, player_id, player_key, player_index, pos_index, pos_key;
     vector<string> queryS;
 
     queryS = split(query, " ");
@@ -364,7 +390,30 @@ bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vec
             }
         }
     } else if (queryS[0] == "top") {
+        // get N top player by position with at least 1000 evaluations
+        int lim = stoi(queryS[1]);
+        string pos = queryS[2];
+        pos_key = calcString(pos) % sizeHashPos;
 
+        players_list.clear();
+        for (int player_id : hashtablePos[pos_key]) {
+            player_key = player_id % sizeHash;
+            player_index = returnIndexPlayer(hashtableP, sizeHash, player_id);
+            auxPlayer = hashtableP[player_key][player_index];
+            if (auxPlayer.count > 1000)
+                players_list.push_back(make_pair(auxPlayer, auxPlayer.rating / auxPlayer.count));
+        }
+
+        // orders players
+        quick_sort(players_list, 0, players_list.size() - 1);
+
+        // prints players
+        printHeader(true);
+        cout << endl;
+        for (int i = 0; i < lim && i < players_list.size(); i++) {
+            printPlayer(players_list[i].first, true);
+            cout << endl;
+        }
     } else if (queryS[0] == "tags") {
         queryS = split(query, "'");
         // runs first search

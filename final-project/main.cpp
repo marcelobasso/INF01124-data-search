@@ -6,8 +6,10 @@
 #define TAGS "inputs/tags.csv"
 
 int main(){
+    int sizeHashPos = 97;
     vector<vector<Player>> hashtableP;
     vector<vector<User>> hashtableU;
+    vector<vector<int>>hashtablePos(sizeHashPos);
     Trie* names = nullptr;
     Trie* tags = nullptr;
     bool quit = 0;
@@ -18,7 +20,7 @@ int main(){
     auto start = std::chrono::high_resolution_clock::now();
 
     cout << "processing players..." << endl;
-    hashtableP = createHashtablePlayers(PLAYERS, 7993);
+    hashtableP = createHashtablePlayers(PLAYERS, 7993, hashtablePos, sizeHashPos);
     names = createTrie(PLAYERS, 0);
     
     cout << "processing rating..." << endl;
@@ -41,7 +43,7 @@ int main(){
         if (input == "help")
             printHelp();
         else
-            runQuery(input, hashtableP, hashtableU, names, tags, 7993);
+            runQuery(input, hashtableP, hashtableU, hashtablePos, names, tags, 7993, sizeHashPos);
     }
 
     // testes

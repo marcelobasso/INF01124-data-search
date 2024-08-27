@@ -56,13 +56,17 @@ Trie* createNode(char c, int value);
 vector<int> searchTrie(Trie* root, const std::string& name, int d);
 
 // @brief Creates player hashtable.
-vector<vector<Player>> createHashtablePlayers(string file, int sizeHash);
+vector<vector<Player>> createHashtablePlayers(string file, int sizeHash, vector<vector<int>>& hashtablePos, int sizePosHash);
 
 // @brief Creates users hashtable.
 vector<vector<User>> createsHashtableUsers(string file, int sizeHash, vector<vector<Player>> &hashtable);
 
 // @brief function to inser a new element on the players hashtable.
 void insertHashPlayer(vector<string> stats_player, vector<vector<Player>>& hashtable, int sizeHash);
+
+void insertHashPositions(vector<string> stats_player, vector<vector<int>> &hashtable, int sizeHash);
+
+std::vector<std::string> split(std::string s, std::string delimiter);
 
 // @brief function to inser a new element on the users hashtable.
 void insertHashUser(vector<string> review, vector<vector<Player>>& hashtablePlayer, vector<vector<User>>& hashtable, int sizeHash, int sizeHashP);
@@ -83,7 +87,7 @@ Player searchHash(int fifa_id, vector<vector<Player>> &hashtable);
 void printHelp();
 
 // @brief execute query based on input
-bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vector<User>>& hashtableU, Trie* names, Trie* tags, int sizeHash);
+bool runQuery(const string query, vector<vector<Player>>& hashtableP, vector<vector<User>>& hashtableU, vector<vector<int>>& hashtablePos, Trie* names, Trie* tags, int sizeHash, int sizeHashPos);
 
 // @brief Sorts list of players when on "user" search
 void quicksortPlayers(vector<pair<Player, float>>& players_list);
